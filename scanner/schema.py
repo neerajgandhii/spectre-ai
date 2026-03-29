@@ -11,7 +11,7 @@ VALID SOURCE VALUES:
   "network_traffic"   → observed by mitmproxy traffic capture
   "kubernetes"        → found in a Docker/Kubernetes manifest
 
-VALID STATE VALUES (set by Member 2):
+VALID STATE VALUES (to be set by classification step):
   "active"   → known, documented, recently used
   "shadow"   → receiving traffic but not in any gateway or repo
   "zombie"   → in gateway/repo but no traffic in 90+ days
