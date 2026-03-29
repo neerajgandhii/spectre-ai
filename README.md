@@ -1,4 +1,4 @@
-# SPECTRE — API Discovery Engine
+# SPECTRE : API Discovery Engine
 
 > **S**hadow, **P**hantom, **C**lassified, **T**erminated & **R**ogue API **E**ngine
 
@@ -10,15 +10,17 @@
 
 ---
 
+![SPECTRE Demo](assets/screenshot.png)
+
 ## What this is
 
-This is the **discovery engine** for SPECTRE — a platform built to answer one question every security team should be asking:
+This is the **discovery engine** for SPECTRE, a platform built to answer one question every security team should be asking:
 
 > *"What APIs are currently live on our network, and are any of them dangerous?"*
 
-Modern organizations accumulate APIs over years of development. Endpoints get deprecated but never switched off. Debug routes get forgotten in production. Services get migrated but old APIs keep running with no authentication, no rate limiting, and nobody watching them. These are called **Shadow APIs** and **Zombie APIs** — and they are one of the most common and underreported attack surfaces in software systems today.
+Modern organizations accumulate APIs over years of development. Endpoints get deprecated but never switched off. Debug routes get forgotten in production. Services get migrated but old APIs keep running with no authentication, no rate limiting, and nobody watching them. These are called **Shadow APIs** and **Zombie APIs**; and they are one of the most common and underreported attack surfaces in software systems today.
 
-This engine finds them. It scans four sources simultaneously, cross-references what it finds across all of them, and surfaces every endpoint — including the ones that exist nowhere on paper.
+This engine finds them. It scans four sources simultaneously, cross-references what it finds across all of them, and surfaces every endpoint - including the ones that exist nowhere on paper.
 
 ---
 
@@ -41,13 +43,13 @@ Network traffic ────┘
          (mitmproxy)
 ```
 
-**Stage 1 — Nginx parser** reads gateway config files and extracts every `location` block, detecting auth mechanisms like `auth_jwt` and `auth_basic` at the config level.
+**Stage 1 : Nginx parser** reads gateway config files and extracts every `location` block, detecting auth mechanisms like `auth_jwt` and `auth_basic` at the config level.
 
-**Stage 2 — Kong parser** reads Kong declarative YAML configs, traverses the service/route/plugin tree, and handles auth detection at both service level and route level independently.
+**Stage 2 : Kong parser** reads Kong declarative YAML configs, traverses the service/route/plugin tree, and handles auth detection at both service level and route level independently.
 
-**Stage 3 — AST parser** uses Python's built-in `ast` module to walk the syntax tree of FastAPI and Flask source files, extracting route decorators without executing any code. Detects auth via function argument analysis.
+**Stage 3 : AST parser** uses Python's built-in `ast` module to walk the syntax tree of FastAPI and Flask source files, extracting route decorators without executing any code. Detects auth via function argument analysis.
 
-**Stage 4 — Traffic capture** runs a script inside mitmproxy that intercepts live HTTP traffic and logs every unique endpoint observed. An endpoint that appears here but in none of the other three sources is a **shadow API** — the core finding SPECTRE is built around.
+**Stage 4 : Traffic capture** runs a script inside mitmproxy that intercepts live HTTP traffic and logs every unique endpoint observed. An endpoint that appears here but in none of the other three sources is a **shadow API** - the core finding SPECTRE is built around.
 
 The main scanner merges all four sources, deduplicates by endpoint ID, and produces a single `discovered_endpoints.json` file. Each record carries where the endpoint was found, whether authentication was detected, what HTTP status codes were observed in traffic, and a `state` field that the classifier uses downstream.
 
@@ -62,7 +64,7 @@ AND in_gateway   = false
 AND in_repo      = false
 ```
 
-It exists. It is receiving real traffic. But it appears in no config file and no codebase. This is **OWASP API9: Improper Inventory Management** — and it is the root cause of some of the most serious API breaches on record.
+It exists. It is receiving real traffic. But it appears in no config file and no codebase. This is **OWASP API9: Improper Inventory Management**; and it is the root cause of some of the most serious API breaches on record.
 
 ---
 
@@ -147,43 +149,43 @@ pip install mitmproxy        # only needed for traffic capture
 
 # Verify
 python scanner/schema.py
-# Should print a sample endpoint and "Valid — no errors found."
+# Should print a sample endpoint and "Valid - no errors found."
 ```
 
 ---
 
 ## Running the scanner
 
-### Quick run — file parsers only
+### Quick run - file parsers only
 ```bash
 python scanner/main.py
 ```
 
 Scans `test_files/` and writes `output/discovered_endpoints.json`.
 
-### Full run — including live traffic capture
+### Full run - including live traffic capture
 
 You need three terminals open at the same time.
 
-**Terminal 1 — start a test service:**
+**Terminal 1 - start a test service:**
 ```bash
 pip install fastapi uvicorn
 uvicorn test_files.test_fastapi_service:app --port 8001
 ```
 
-**Terminal 2 — start mitmproxy:**
+**Terminal 2 - start mitmproxy:**
 ```bash
 mitmdump -s scanner/parsers/traffic_parser.py --listen-port 8080
 ```
 
-**Terminal 3 — send traffic through the proxy:**
+**Terminal 3 - send traffic through the proxy:**
 ```bash
 # Windows
 curl.exe --proxy http://localhost:8080 http://localhost:8001/api/v1/users
 curl.exe --proxy http://localhost:8080 http://localhost:8001/internal/debug
 ```
 
-Watch Terminal 2 — you will see endpoints being logged in real time. Then run the full scanner:
+Watch Terminal 2, you will see endpoints being logged in real time. Then run the full scanner:
 ```bash
 python scanner/main.py
 ```
@@ -218,7 +220,7 @@ The `/scan/sample` endpoint runs your real parsers on the bundled test files and
 
 **Backend → Render (free tier)**
 
-The repo includes `render.yaml` which Render reads automatically. Connect your GitHub repo on render.com, select "Web Service", and it deploys itself. The service sleeps after 15 minutes of inactivity — the frontend sends a wake-up ping the moment the page loads so it's warm before the user clicks anything.
+The repo includes `render.yaml` which Render reads automatically. Connect your GitHub repo on render.com, select "Web Service", and it deploys itself. The service sleeps after 15 minutes of inactivity, the frontend sends a wake-up ping the moment the page loads so it's warm before the user clicks anything.
 
 **Frontend → Vercel (free tier)**
 
@@ -261,20 +263,17 @@ This repository is the discovery stage of the SPECTRE platform. The output file 
 
 ## References
 
-1. OWASP Foundation — OWASP API Security Top 10, 2023 Edition
-2. Haupt et al. — A Framework for the Structural Analysis of REST APIs, IEEE SOSE 2017
-3. Fang et al. — LLM Agents Can Autonomously Exploit One-Day Vulnerabilities, arXiv 2024
-4. Postman Inc. — 2023 State of the API Report
-5. Salt Security — State of API Security Report Q1 2023
+1. OWASP Foundation : OWASP API Security Top 10, 2023 Edition
+2. Haupt et al. : A Framework for the Structural Analysis of REST APIs, IEEE SOSE 2017
+3. Fang et al. : LLM Agents Can Autonomously Exploit One-Day Vulnerabilities, arXiv 2024
+4. Postman Inc. : 2023 State of the API Report
+5. Salt Security : State of API Security Report Q1 2023
 
 ---
 
 ## Author
 
 **Neeraj Gandhi**
-B.Tech Computer Science & Engineering — Semester VIII
-Guru Tegh Bahadur Institute of Technology, Delhi
-Affiliated to Guru Gobind Singh Indraprastha University
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-neerajgandhii-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/neerajgandhii/)
 [![Email](https://img.shields.io/badge/Email-neerajgandhii2003%40gmail.com-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:neerajgandhii2003@gmail.com)
