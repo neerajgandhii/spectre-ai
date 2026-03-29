@@ -669,6 +669,7 @@ function showError(title, msg){
   document.getElementById('err-title').textContent = title;
   document.getElementById('err-msg').textContent = msg;
   document.getElementById('err-banner').classList.add('show');
+  setTimeout(()=> document.getElementById('err-banner').scrollIntoView({behavior:'smooth', block:'center'}), 100);
 }
 
 function hideError(){
@@ -684,6 +685,7 @@ async function run(){
   // Show terminal animation
   const term = document.getElementById('terminal');
   term.classList.add('show');
+  setTimeout(()=> term.scrollIntoView({behavior:'smooth', block:'start'}), 100);
   const tbody = document.getElementById('tbody');
   tbody.innerHTML = '';
 
@@ -811,6 +813,7 @@ function showResults(eps){
 
   document.getElementById('jbox').textContent = JSON.stringify(eps, null, 2);
   document.getElementById('results').classList.add('show');
+  setTimeout(()=> document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'}), 100);
 }
 
 // ── JSON TOGGLE ─────────────────────────────────────
