@@ -391,6 +391,7 @@ footer{
         <div class="btab on" onclick="showTab(0)">test_nginx.conf</div>
         <div class="btab" onclick="showTab(1)">test_kong.yml</div>
         <div class="btab" onclick="showTab(2)">test_fastapi_service.py</div>
+        <div class="btab" onclick="showTab(3)">traffic_log.json</div>
       </div>
       <div class="bprev" id="bprev"></div>
     </div>
@@ -563,7 +564,28 @@ def debug():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}`
+    return {"status": "ok"}`,
+`{
+  "a9f3c2d11e4b": {
+    "id": "a9f3c2d11e4b",
+    "method": "GET",
+    "path": "/api/v2/internal/users",
+    "service_name": "shadow-service",
+    "sources": ["network_traffic"],
+    "in_repo": false,
+    "in_gateway": false,
+    "seen_in_traffic": true,
+    "auth_detected": false,
+    "auth_type": "none",
+    "status_codes": [200],
+    "last_seen": "2025-03-17T10:22:41Z",
+    "tags": ["traffic"],
+    "raw_context": "Observed at shadow-service — not in any config or codebase",
+    "state": "unknown",
+    "owasp_flags": [],
+    "risk_reason": ""
+  }
+}`
 ];
 
 // Terminal animation lines
