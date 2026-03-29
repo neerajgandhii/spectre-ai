@@ -2,7 +2,7 @@
 
 > **S**hadow, **P**hantom, **C**lassified, **T**erminated & **R**ogue API **E**ngine
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-spectre--ai.vercel.app-00e676?style=flat-square&logo=vercel&logoColor=black)](https://spectre-ai.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-spectre--ai.vercel.app-00e676?style=flat-square&logo=vercel&logoColor=black)](https://spectre-ai-xi.vercel.app/)
 [![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat-square&logo=render&logoColor=black)](https://spectre-ai-gls6.onrender.com/ping)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
