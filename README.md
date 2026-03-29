@@ -11,7 +11,7 @@
 ---
 
 <div align="center">
-  <img src="assets/screenshot.png" alt="SPECTRE Demo" width="550">
+  <img src="assets/screenshot.png" alt="SPECTRE Demo" width="600">
 </div>
 
 ## What this is
@@ -28,7 +28,7 @@ This engine finds them. It scans four sources simultaneously, cross-references w
 
 ## Live demo
 
-**[spectre-ai.vercel.app](https://spectre-ai-xi.vercel.app/)**
+**[spectre-ai-xi.vercel.app](https://spectre-ai-xi.vercel.app/)**
 
 The demo runs your actual Python scanner on a bundled test environment with a planted shadow API. You can also upload your own Nginx configs, Kong YAML, or Python service files to scan them directly.
 
