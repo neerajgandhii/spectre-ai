@@ -250,7 +250,7 @@ async def scan_upload(
                 errors.append(f"AST parse failed: {str(e)}")
 
         # ── Traffic log ────────────────────────
-        traffic_eps = [SHADOW_ENDPOINT]
+        traffic_eps = []
         if traffic and traffic.filename:
             try:
                 content = await traffic.read()
