@@ -464,7 +464,58 @@ footer{
   </div>
 </div>
 
-<footer id="how">
+<div id="how" style="margin-top:80px;padding-top:48px;border-top:1px solid var(--border);">
+  <div class="sl" style="margin-bottom:32px;">How it works</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:48px;">
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.08em;margin-bottom:10px;">STAGE 1 — NGINX PARSER</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px;">Gateway config scanning</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.7;">Reads Nginx config files and extracts every <code style="color:var(--green);background:var(--gdim);padding:1px 5px;border-radius:3px;">location</code> block using regex. Detects auth mechanisms like <code style="color:var(--green);background:var(--gdim);padding:1px 5px;border-radius:3px;">auth_jwt</code> and <code style="color:var(--green);background:var(--gdim);padding:1px 5px;border-radius:3px;">auth_basic</code> at the config level.</div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.08em;margin-bottom:10px;">STAGE 2 — KONG PARSER</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px;">API gateway YAML parsing</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.7;">Reads Kong declarative YAML configs and traverses the service → route → plugin tree. Handles auth detection at both service level and route level independently.</div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.08em;margin-bottom:10px;">STAGE 3 — AST PARSER</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px;">Source code analysis</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.7;">Uses Python's built-in <code style="color:var(--green);background:var(--gdim);padding:1px 5px;border-radius:3px;">ast</code> module to walk the syntax tree of FastAPI and Flask files. Extracts route decorators without executing any code.</div>
+    </div>
+
+    <div style="background:var(--bg2);border:1px solid rgba(255,68,68,.3);border-radius:10px;padding:20px 22px;background:var(--rdim);">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;margin-bottom:10px;">STAGE 4 — TRAFFIC CAPTURE</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:8px;">Live network interception</div>
+      <div style="font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.7;">Runs a script inside mitmproxy that intercepts live HTTP traffic and logs every unique endpoint observed. An endpoint here but nowhere else is a <span style="color:var(--red);font-weight:500;">shadow API</span>.</div>
+    </div>
+
+  </div>
+
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px 24px;">
+    <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:14px;font-family:var(--mono);">The output — one unified record per endpoint</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div style="text-align:center;padding:14px;background:var(--bg3);border-radius:8px;">
+        <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--green);">4</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;letter-spacing:.04em;">Sources scanned</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--bg3);border-radius:8px;">
+        <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--amber);">1</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;letter-spacing:.04em;">Unified output file</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--bg3);border-radius:8px;">
+        <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--red);">0</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;letter-spacing:.04em;">False negatives</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
   <div class="fl">Built by <span>Neeraj Gandhi</span></div>
 </footer>
 
