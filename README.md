@@ -10,8 +10,7 @@
 
 ---
 
-![SPECTRE Demo](assets/screenshot.png)
-
+<img src="assets/screenshot.png" alt="SPECTRE Demo" width="500">
 ## What this is
 
 This is the **discovery engine** for SPECTRE, a platform built to answer one question every security team should be asking:
