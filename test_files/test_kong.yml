@@ -1,0 +1,41 @@
+services:
+  - name: user-service
+    url: http://user-service:8000
+    plugins:
+      - name: jwt
+    routes:
+      - name: get-users
+        paths:
+          - /api/v1/users
+        methods:
+          - GET
+      - name: create-user
+        paths:
+          - /api/v1/users
+        methods:
+          - POST
+
+  - name: payment-service
+    url: http://payment-service:8001
+    routes:
+      - name: get-payments
+        paths:
+          - /api/v1/payments
+        methods:
+          - GET
+        plugins:
+          - name: key-auth
+      - name: create-payment
+        paths:
+          - /api/v1/payments
+        methods:
+          - POST
+
+  - name: legacy-service
+    url: http://legacy-service:9999
+    routes:
+      - name: legacy-data
+        paths:
+          - /api/v0/data
+        methods:
+          - GET

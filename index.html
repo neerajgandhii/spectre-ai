@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPECTRE — API Discovery Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#07070d;--bg2:#0d0d18;--bg3:#13131e;--bg4:#1a1a28;
+  --border:#1c1c2c;--border2:#2a2a3e;--border3:#3a3a52;
+  --green:#00e676;--green2:#00b85c;--green3:#006b35;
+  --gdim:rgba(0,230,118,.07);
+  --red:#ff4444;--rdim:rgba(255,68,68,.08);
+  --amber:#ffaa00;--adim:rgba(255,170,0,.08);
+  --blue:#4d9fff;--bdim:rgba(77,159,255,.08);
+  --purple:#b088ff;
+  --text:#ddddf0;--text2:#8888aa;--text3:#44445e;
+  --mono:'JetBrains Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--display);min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px,transparent 1px),
+    linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.5;
+  pointer-events:none;z-index:0;
+}
+.orb{
+  position:fixed;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,230,118,.035) 0%,transparent 70%);
+  top:-250px;left:-250px;pointer-events:none;z-index:0;
+}
+.page{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 24px 80px;}
+
+/* NAV */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0;border-bottom:1px solid var(--border);margin-bottom:56px;
+}
+.logo{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);letter-spacing:.12em;}
+.nav-r{display:flex;gap:24px;align-items:center;}
+.nav-r a{font-size:11px;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.06em;transition:color .15s;}
+.nav-r a:hover{color:var(--text2);}
+
+/* HERO */
+.hero{margin-bottom:56px;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;color:var(--green);
+  letter-spacing:.1em;margin-bottom:22px;
+}
+.ldot{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:lp 2s ease-in-out infinite;
+}
+@keyframes lp{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.5);}50%{box-shadow:0 0 0 6px rgba(0,230,118,0);}}
+h1{
+  font-size:clamp(38px,5.5vw,60px);font-weight:800;
+  line-height:1.06;letter-spacing:-.03em;color:#fff;margin-bottom:8px;
+}
+h1 em{font-style:normal;color:var(--green);}
+.hsub{
+  font-size:15px;color:var(--text2);line-height:1.65;
+  max-width:500px;margin-bottom:32px;
+  font-family:var(--mono);font-weight:400;
+}
+.pills{display:flex;gap:7px;flex-wrap:wrap;}
+.pill{
+  font-family:var(--mono);font-size:10px;padding:4px 11px;
+  border-radius:4px;border:1px solid var(--border2);color:var(--text3);
+  letter-spacing:.04em;
+}
+.pill.g{border-color:var(--green3);color:var(--green);background:var(--gdim);}
+
+/* SERVER BAR */
+.sbar{
+  display:flex;align-items:center;gap:10px;padding:9px 14px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:36px;width:fit-content;
+}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--amber);transition:background .5s;}
+.sdot.ready{background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.35);}
+.sdot.err{background:var(--red);}
+.stxt{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:.04em;}
+
+/* ERROR BANNER */
+.err-banner{
+  display:none;
+  background:var(--rdim);border:1px solid rgba(255,68,68,.25);
+  border-radius:10px;padding:14px 18px;margin-bottom:20px;
+}
+.err-banner.show{display:flex;align-items:flex-start;gap:12px;}
+.err-icon{color:var(--red);font-family:var(--mono);font-size:14px;flex-shrink:0;margin-top:1px;}
+.err-text{font-size:13px;color:var(--text);line-height:1.6;}
+.err-text strong{color:var(--red);font-size:12px;display:block;margin-bottom:3px;font-family:var(--mono);}
+.err-btn{
+  margin-top:8px;background:var(--green);color:#000;border:none;
+  border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;
+  font-family:var(--display);cursor:pointer;
+}
+
+/* SECTION LABEL */
+.sl{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.12em;color:var(--text3);
+  text-transform:uppercase;margin-bottom:13px;
+}
+
+/* MODE CARDS */
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;}
+.mc{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:20px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.mc:hover{border-color:var(--border2);}
+.mc.on{border-color:var(--green2);background:var(--gdim);}
+.mc-r{
+  width:14px;height:14px;border-radius:50%;
+  border:1.5px solid var(--border3);margin-bottom:14px;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.mc.on .mc-r{border-color:var(--green);background:var(--green);}
+.mc.on .mc-r::after{content:'';width:5px;height:5px;border-radius:50%;background:#000;}
+.mc-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:5px;}
+.mc-sub{font-size:12px;color:var(--text2);line-height:1.55;font-family:var(--mono);}
+
+/* SAMPLE BROWSER */
+.browser{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:10px;
+}
+.btabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.btab{
+  padding:10px 15px;font-size:11px;font-family:var(--mono);
+  color:var(--text3);cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .15s;flex-shrink:0;
+}
+.btab:hover{color:var(--text2);}
+.btab.on{color:var(--green);border-bottom-color:var(--green);}
+.bprev{
+  padding:18px 20px;font-family:var(--mono);font-size:11.5px;
+  color:var(--text2);line-height:1.8;max-height:175px;
+  overflow-y:auto;white-space:pre;background:#040408;
+}
+.bprev::-webkit-scrollbar{width:3px;}
+.bprev::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* UPLOAD ZONES */
+.ugrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.uz{
+  background:var(--bg2);border:1.5px dashed var(--border2);
+  border-radius:10px;padding:18px;cursor:pointer;
+  transition:border-color .15s,background .15s;text-align:center;
+}
+.uz:hover{border-color:var(--green3);}
+.uz.filled{border-style:solid;border-color:var(--green2);background:var(--gdim);}
+.uz.opt{border-color:var(--border);}
+.uz-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.uz-sub{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.uz-name{font-size:11px;color:var(--green);font-family:var(--mono);margin-top:5px;}
+input[type=file]{display:none;}
+.traffic-note{
+  background:var(--bdim);border:1px solid rgba(77,159,255,.15);
+  border-radius:8px;padding:13px 16px;margin-bottom:22px;
+}
+.traffic-note p{font-size:12px;color:var(--text2);font-family:var(--mono);line-height:1.7;margin-bottom:6px;}
+.traffic-note p:last-child{margin-bottom:0;}
+.traffic-note code{color:var(--blue);background:rgba(77,159,255,.1);padding:1px 5px;border-radius:3px;}
+
+/* RUN BUTTON */
+.run-btn{
+  width:100%;padding:15px;background:var(--green);color:#000;
+  border:none;border-radius:10px;font-size:14px;font-weight:700;
+  font-family:var(--display);cursor:pointer;letter-spacing:.02em;
+  transition:background .15s,transform .1s;position:relative;overflow:hidden;
+}
+.run-btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.run-btn:hover{background:#00ff8a;}
+.run-btn:hover::after{transform:translateX(100%);}
+.run-btn:active{transform:scale(.99);}
+.run-btn:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;}
+
+/* TERMINAL */
+.terminal{
+  background:#03030a;border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;display:none;margin-bottom:36px;
+}
+.terminal.show{display:block;animation:fu .3s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.tbar{
+  background:var(--bg3);padding:10px 16px;
+  display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--border);
+}
+.tdot{width:11px;height:11px;border-radius:50%;}
+.ttitle{font-size:11px;font-family:var(--mono);color:var(--text3);margin-left:6px;letter-spacing:.04em;}
+.tbody{padding:22px;font-family:var(--mono);font-size:12.5px;line-height:2;min-height:200px;}
+.tl{opacity:0;transform:translateY(3px);transition:opacity .2s,transform .2s;}
+.tl.show{opacity:1;transform:translateY(0);}
+.dim{color:var(--text3);}
+.tg{color:var(--green);}
+.tr{color:var(--red);}
+.ta{color:var(--amber);}
+.tb{color:var(--blue);}
+.tp{color:var(--purple);}
+.tw{color:#fff;font-weight:500;}
+.cursor{
+  display:inline-block;width:8px;height:15px;
+  background:var(--green);vertical-align:middle;
+  animation:cb .75s step-end infinite;margin-left:2px;
+}
+@keyframes cb{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* RESULTS */
+.results{display:none;}
+.results.show{display:block;animation:fu .4s ease;}
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:26px;}
+.sc{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:15px 17px;
+}
+.sc-n{font-size:26px;font-weight:700;font-family:var(--mono);color:#fff;line-height:1;}
+.sc-n.g{color:var(--green);}
+.sc-n.r{color:var(--red);}
+.sc-n.a{color:var(--amber);}
+.sc-n.b{color:var(--blue);}
+.sc-l{font-size:10px;color:var(--text3);margin-top:6px;font-family:var(--mono);letter-spacing:.04em;}
+
+/* ENDPOINT CARDS */
+.eplist{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}
+.epc{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:13px 17px;
+  transition:border-color .15s;
+  animation:fu .3s ease both;
+}
+.epc:hover{border-color:var(--border2);}
+.epc.shadow{border-color:rgba(255,68,68,.4);background:var(--rdim);}
+.epc.zombie{border-color:rgba(255,170,0,.3);background:var(--adim);}
+.er1{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.mb{
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:4px;letter-spacing:.05em;flex-shrink:0;
+}
+.mbg{background:var(--bdim);color:var(--blue);border:1px solid rgba(77,159,255,.2);}
+.mbp{background:rgba(176,136,255,.08);color:var(--purple);border:1px solid rgba(176,136,255,.2);}
+.mbd{background:var(--rdim);color:var(--red);border:1px solid rgba(255,68,68,.2);}
+.mba{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);}
+.epath{font-family:var(--mono);font-size:13px;color:#fff;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.er2{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.tag{font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:4px;font-weight:500;letter-spacing:.03em;}
+.t-nginx{background:#0c1e0c;color:#66cc66;border:1px solid #193319;}
+.t-kong{background:#0c0c1e;color:#6666cc;border:1px solid #19193a;}
+.t-code{background:#180c1e;color:#cc66cc;border:1px solid #281928;}
+.t-traffic{background:#1e180c;color:#ccaa44;border:1px solid #2a2619;}
+.t-noauth{background:var(--rdim);color:var(--red);border:1px solid rgba(255,68,68,.2);}
+.t-auth{background:var(--gdim);color:var(--green);border:1px solid rgba(0,230,118,.15);}
+.t-shadow{background:var(--rdim);color:var(--red);border:1px solid var(--red);font-weight:700;}
+.t-zombie{background:var(--adim);color:var(--amber);border:1px solid rgba(255,170,0,.3);}
+.ewarn{
+  margin-top:9px;padding-top:9px;
+  border-top:1px solid rgba(255,68,68,.12);
+  font-size:11px;color:rgba(255,100,100,.85);font-family:var(--mono);
+}
+
+/* JSON */
+.jtoggle{
+  background:none;border:1px solid var(--border2);border-radius:8px;
+  padding:9px 18px;font-size:12px;font-family:var(--mono);
+  color:var(--text2);cursor:pointer;transition:all .15s;letter-spacing:.03em;
+}
+.jtoggle:hover{border-color:var(--border3);color:var(--text);}
+.jbox{
+  display:none;margin-top:10px;
+  background:#03030a;border:1px solid var(--border);border-radius:10px;
+  padding:18px 20px;font-family:var(--mono);font-size:11px;
+  color:var(--text2);line-height:1.75;overflow-x:auto;white-space:pre;
+  max-height:380px;overflow-y:auto;
+}
+.jbox.show{display:block;animation:fu .2s ease;}
+.jbox::-webkit-scrollbar{width:3px;height:3px;}
+.jbox::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* BOTTOM */
+.brow{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:20px;}
+.rbtn{
+  background:none;border:1px solid var(--border2);border-radius:8px;
+  padding:10px 20px;font-size:13px;font-family:var(--display);
+  color:var(--text2);cursor:pointer;transition:all .15s;
+}
+.rbtn:hover{border-color:var(--border3);color:var(--text);}
+.ghl{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  text-decoration:none;letter-spacing:.04em;transition:color .15s;
+}
+.ghl:hover{color:var(--text2);}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);padding-top:28px;margin-top:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.fl{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.fl span{color:var(--green);}
+.fr{font-family:var(--mono);font-size:11px;color:var(--text3);}
+
+@media(max-width:600px){
+  .mrow,.ugrid,.srow{grid-template-columns:1fr;}
+  h1{font-size:34px;}
+}
+</style>
+</head>
+<body>
+<div class="orb"></div>
+<div class="page">
+
+<nav>
+  <div class="logo">SPECTRE</div>
+  <div class="nav-r">
+    <a href="https://github.com/YOURNAME/spectre-discovery" target="_blank">GitHub</a>
+    <a href="#how">How it works</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="eyebrow"><div class="ldot"></div>Live Demo — Discovery Engine</div>
+  <h1>Find every API.<br><em>Especially the<br>hidden ones.</em></h1>
+  <p class="hsub">Upload your gateway configs and source files. SPECTRE scans four sources, cross-references them, and surfaces every endpoint — including shadow APIs that exist nowhere on paper.</p>
+  <div class="pills">
+    <span class="pill g">OWASP API9</span>
+    <span class="pill">Nginx · Kong · AST · mitmproxy</span>
+    <span class="pill">Shadow API detection</span>
+    <span class="pill">Python · FastAPI</span>
+  </div>
+</div>
+
+<div id="input">
+
+  <div class="sbar">
+    <div class="sdot" id="sdot"></div>
+    <span class="stxt" id="stxt">Connecting to backend...</span>
+  </div>
+
+  <!-- ERROR BANNER -->
+  <div class="err-banner" id="err-banner">
+    <div class="err-icon">!!</div>
+    <div class="err-text">
+      <strong id="err-title">Backend unavailable</strong>
+      <span id="err-msg">The server could not be reached. This usually happens when the free-tier backend is cold. Please use the sample files instead — they run the same scanner on our bundled test configs.</span>
+      <button class="err-btn" onclick="switchToSample()">Switch to sample files</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:28px;">
+    <div class="sl">Choose mode</div>
+    <div class="mrow">
+      <div class="mc on" id="mc-s" onclick="setMode('sample')">
+        <div class="mc-r"></div>
+        <div class="mc-title">Use sample files</div>
+        <div class="mc-sub">Browse the included test configs. Runs the real Python scanner on our bundled files. Recommended.</div>
+      </div>
+      <div class="mc" id="mc-u" onclick="setMode('upload')">
+        <div class="mc-r"></div>
+        <div class="mc-title">Upload your own files</div>
+        <div class="mc-sub">Point the scanner at your own Nginx configs, Kong YAML, or Python services.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sample-sec" style="margin-bottom:28px;">
+    <div class="sl">Browse sample files</div>
+    <div class="browser">
+      <div class="btabs">
+        <div class="btab on" onclick="showTab(0)">test_nginx.conf</div>
+        <div class="btab" onclick="showTab(1)">test_kong.yml</div>
+        <div class="btab" onclick="showTab(2)">test_fastapi_service.py</div>
+      </div>
+      <div class="bprev" id="bprev"></div>
+    </div>
+  </div>
+
+  <div id="upload-sec" style="display:none;margin-bottom:28px;">
+    <div class="sl">Upload your files</div>
+    <div class="ugrid">
+      <div class="uz" id="uz-n" onclick="document.getElementById('fi-n').click()">
+        <div class="uz-title">Nginx config</div>
+        <div class="uz-sub">.conf file</div>
+        <div class="uz-name" id="un-n"></div>
+        <input type="file" id="fi-n" accept=".conf,.txt" onchange="pick('n',this)">
+      </div>
+      <div class="uz" id="uz-k" onclick="document.getElementById('fi-k').click()">
+        <div class="uz-title">Kong config</div>
+        <div class="uz-sub">.yml / .yaml</div>
+        <div class="uz-name" id="un-k"></div>
+        <input type="file" id="fi-k" accept=".yml,.yaml" onchange="pick('k',this)">
+      </div>
+      <div class="uz opt" id="uz-p" onclick="document.getElementById('fi-p').click()">
+        <div class="uz-title">Python service</div>
+        <div class="uz-sub">.py file — optional</div>
+        <div class="uz-name" id="un-p"></div>
+        <input type="file" id="fi-p" accept=".py" onchange="pick('p',this)">
+      </div>
+      <div class="uz opt" id="uz-t" onclick="document.getElementById('fi-t').click()">
+        <div class="uz-title">Traffic log</div>
+        <div class="uz-sub">traffic_log.json — optional</div>
+        <div class="uz-name" id="un-t"></div>
+        <input type="file" id="fi-t" accept=".json" onchange="pick('t',this)">
+      </div>
+    </div>
+    <div class="traffic-note">
+      <p>To generate a real traffic log, run mitmproxy on your machine:</p>
+      <p><code>mitmdump -s scanner/parsers/traffic_parser.py --listen-port 8080</code></p>
+      <p>Then upload the <code>output/traffic_log.json</code> it produces.</p>
+    </div>
+  </div>
+
+  <button class="run-btn" id="runbtn" onclick="run()">Run scanner</button>
+</div>
+
+<!-- TERMINAL -->
+<div class="terminal" id="terminal">
+  <div class="tbar">
+    <div class="tdot" style="background:#ff5f57;"></div>
+    <div class="tdot" style="background:#ffbd2e;"></div>
+    <div class="tdot" style="background:#28c840;"></div>
+    <div class="ttitle">spectre — discovery engine · python scanner/main.py</div>
+  </div>
+  <div class="tbody" id="tbody"></div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="results">
+  <div class="sl" style="margin-bottom:13px;">Scan complete</div>
+  <div class="srow" id="srow"></div>
+  <div class="sl" style="margin:4px 0 11px;">Discovered endpoints</div>
+  <div class="eplist" id="eplist"></div>
+  <div style="margin-bottom:20px;">
+    <button class="jtoggle" onclick="toggleJson()">View raw JSON output</button>
+    <div class="jbox" id="jbox"></div>
+  </div>
+  <div class="brow">
+    <button class="rbtn" onclick="reset()">Run another scan</button>
+    <a class="ghl" href="https://github.com/YOURNAME/spectre-discovery" target="_blank">View source on GitHub →</a>
+  </div>
+</div>
+
+<footer id="how">
+  <div class="fl">Built by <span>Harjot Kaur</span> · GTBIT Delhi · 2025–26</div>
+  <div class="fr">Part of the SPECTRE API Threat Classification Platform</div>
+</footer>
+
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────
+// Change this to your actual Render URL after deploying
+const BACKEND = 'https://spectre-discovery.onrender.com';
+
+// ── SAMPLE FILE CONTENTS ────────────────────────────
+const SAMPLES = [
+`server {
+    listen 80;
+    server_name api.example.com;
+
+    location /api/v1/users {
+        proxy_pass http://user-service:8000;
+        auth_jwt "User API";
+    }
+
+    location /api/v1/payments {
+        proxy_pass http://payment-service:8001;
+        auth_basic "Payment API";
+    }
+
+    location /api/v1/products {
+        proxy_pass http://product-service:8002;
+    }
+
+    location /internal/debug/logs {
+        proxy_pass http://debug-service:9000;
+    }
+
+    location /health {
+        return 200 "ok";
+    }
+}`,
+`services:
+  - name: user-service
+    url: http://user-service:8000
+    plugins:
+      - name: jwt
+    routes:
+      - name: get-users
+        paths: [/api/v1/users]
+        methods: [GET]
+      - name: create-user
+        paths: [/api/v1/users]
+        methods: [POST]
+
+  - name: payment-service
+    url: http://payment-service:8001
+    routes:
+      - name: get-payments
+        paths: [/api/v1/payments]
+        methods: [GET]
+        plugins:
+          - name: key-auth
+      - name: create-payment
+        paths: [/api/v1/payments]
+        methods: [POST]
+
+  - name: legacy-service
+    url: http://legacy-service:9999
+    routes:
+      - name: legacy-data
+        paths: [/api/v0/data]
+        methods: [GET]`,
+`from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordBearer
+
+app = FastAPI()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.get("/api/v1/users")
+def get_users():
+    return {"users": []}
+
+@app.post("/api/v1/users")
+def create_user():
+    return {"created": True}
+
+@app.delete("/api/v1/users/{user_id}")
+def delete_user(user_id: int, token=Depends(oauth2_scheme)):
+    return {"deleted": True}
+
+@app.get("/api/v1/payments")
+def get_payments(token=Depends(oauth2_scheme)):
+    return {"payments": []}
+
+@app.post("/api/v1/payments")
+def create_payment():
+    return {"payment": "created"}
+
+@app.get("/internal/debug")
+def debug():
+    return {"debug": True}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}`
+];
+
+// Terminal animation lines
+const LINES = [
+  {t:'',ms:0},
+  {t:'<span class="dim">$ </span><span class="tw">python scanner/main.py</span>',ms:300},
+  {t:'',ms:500},
+  {t:'<span class="dim">══════════════════════════════════════</span>',ms:700},
+  {t:'<span class="tg tw">  SPECTRE — API Discovery Scanner</span>',ms:800},
+  {t:'<span class="dim">══════════════════════════════════════</span>',ms:900},
+  {t:'',ms:1000},
+  {t:'<span class="dim">[scanner] Running </span><span class="tb">Nginx</span><span class="dim"> parser...</span>',ms:1200},
+  {t:'<span class="dim">  test_nginx.conf       → </span><span class="tg">5 endpoints</span><span class="dim">, 5 new</span>',ms:1800},
+  {t:'',ms:1900},
+  {t:'<span class="dim">[scanner] Running </span><span class="tp">Kong</span><span class="dim"> parser...</span>',ms:2100},
+  {t:'<span class="dim">  test_kong.yml         → </span><span class="tg">5 endpoints</span><span class="dim">, 3 new</span>',ms:2700},
+  {t:'',ms:2800},
+  {t:'<span class="dim">[scanner] Running </span><span class="tb">AST</span><span class="dim"> code scanner...</span>',ms:3000},
+  {t:'<span class="dim">  test_files/           → </span><span class="tg">7 routes</span><span class="dim">, 4 new</span>',ms:3600},
+  {t:'',ms:3700},
+  {t:'<span class="dim">[scanner] Loading </span><span class="ta">traffic</span><span class="dim"> log...</span>',ms:3900},
+  {t:'<span class="dim">  traffic_log.json      → </span><span class="tg">1 observed</span><span class="dim">, 1 new</span>',ms:4500},
+  {t:'',ms:4600},
+  {t:'<span class="dim">[scanner] Deduplicating...  </span><span class="tg">✓</span>',ms:4800},
+  {t:'<span class="dim">[scanner] Validating...     </span><span class="tg">✓  All endpoints valid</span>',ms:5100},
+  {t:'',ms:5300},
+  {t:'<span class="ta">!! ─────────────────────────────────────────</span>',ms:5600},
+  {t:'<span class="ta tw">!! SHADOW API DETECTED</span>',ms:5800},
+  {t:'<span class="ta">!! ─────────────────────────────────────────</span>',ms:6000},
+  {t:'<span class="tr">   GET /api/v2/internal/users</span>',ms:6200},
+  {t:'<span class="dim">   In traffic only — not in any config or codebase</span>',ms:6400},
+  {t:'<span class="dim">   Flagged: API2 (no auth) · API9 (not in registry)</span>',ms:6600},
+  {t:'<span class="ta">!! ─────────────────────────────────────────</span>',ms:6800},
+  {t:'',ms:7000},
+  {t:'<span class="dim">[scanner] Output → </span><span class="tg">output/discovered_endpoints.json</span>',ms:7200},
+  {t:'<span class="dim">[scanner] Done.</span><span class="cursor"></span>',ms:7500},
+];
+
+// State
+let mode = 'sample';
+let jsonOpen = false;
+let files = {};
+let backendReady = false;
+
+// ── INIT ────────────────────────────────────────────
+showTab(0);
+pingBackend();
+
+function pingBackend(){
+  fetch(`${BACKEND}/ping`, {signal: AbortSignal.timeout(8000)})
+    .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+    .then(() => {
+      backendReady = true;
+      document.getElementById('sdot').classList.add('ready');
+      document.getElementById('stxt').textContent = 'Backend ready — real Python scanner active';
+    })
+    .catch(() => {
+      // Retry once after 25s (Render cold start)
+      setTimeout(() => {
+        fetch(`${BACKEND}/ping`, {signal: AbortSignal.timeout(15000)})
+          .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+          .then(() => {
+            backendReady = true;
+            document.getElementById('sdot').classList.add('ready');
+            document.getElementById('stxt').textContent = 'Backend ready — real Python scanner active';
+          })
+          .catch(() => {
+            document.getElementById('sdot').classList.add('err');
+            document.getElementById('stxt').textContent = 'Backend unavailable — sample mode recommended';
+          });
+      }, 25000);
+    });
+}
+
+// ── UI HELPERS ──────────────────────────────────────
+function setMode(m){
+  mode = m;
+  document.getElementById('mc-s').classList.toggle('on', m==='sample');
+  document.getElementById('mc-u').classList.toggle('on', m==='upload');
+  document.getElementById('sample-sec').style.display = m==='sample'?'block':'none';
+  document.getElementById('upload-sec').style.display = m==='upload'?'block':'none';
+  hideError();
+}
+
+function switchToSample(){
+  setMode('sample');
+}
+
+function showTab(i){
+  document.querySelectorAll('.btab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.getElementById('bprev').textContent = SAMPLES[i];
+}
+
+function pick(type, input){
+  const f = input.files[0];
+  if(!f) return;
+  files[type] = f;
+  document.getElementById('un-'+type).textContent = f.name;
+  document.getElementById('uz-'+type).classList.add('filled');
+}
+
+function showError(title, msg){
+  document.getElementById('err-title').textContent = title;
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('err-banner').classList.add('show');
+}
+
+function hideError(){
+  document.getElementById('err-banner').classList.remove('show');
+}
+
+// ── RUN ─────────────────────────────────────────────
+async function run(){
+  hideError();
+  document.getElementById('runbtn').disabled = true;
+  document.getElementById('input').style.display = 'none';
+
+  // Show terminal animation
+  const term = document.getElementById('terminal');
+  term.classList.add('show');
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  LINES.forEach(line => {
+    const div = document.createElement('div');
+    div.className = 'tl';
+    div.innerHTML = line.t || '&nbsp;';
+    tbody.appendChild(div);
+    setTimeout(()=>{
+      div.classList.add('show');
+      tbody.scrollTop = tbody.scrollHeight;
+    }, line.ms);
+  });
+
+  // While animation plays, make the real API call
+  let data = null;
+  let apiError = null;
+
+  try {
+    if(mode === 'sample'){
+      const res = await fetch(`${BACKEND}/scan/sample`, {
+        method: 'POST',
+        signal: AbortSignal.timeout(30000)
+      });
+      if(!res.ok) throw new Error(`Server returned ${res.status}`);
+      data = await res.json();
+    } else {
+      // Upload mode
+      const fd = new FormData();
+      if(files['n']) fd.append('nginx', files['n']);
+      if(files['k']) fd.append('kong', files['k']);
+      if(files['p']) fd.append('py', files['p']);
+      if(files['t']) fd.append('traffic', files['t']);
+
+      const res = await fetch(`${BACKEND}/scan/upload`, {
+        method: 'POST',
+        body: fd,
+        signal: AbortSignal.timeout(30000)
+      });
+      if(!res.ok) throw new Error(`Server returned ${res.status}`);
+      data = await res.json();
+    }
+  } catch(e) {
+    apiError = e.message || 'Unknown error';
+  }
+
+  // Wait for animation to finish before showing results
+  setTimeout(() => {
+    if(apiError || !data){
+      // Show error, go back to input
+      document.getElementById('terminal').classList.remove('show');
+      document.getElementById('input').style.display = 'block';
+      document.getElementById('runbtn').disabled = false;
+
+      if(mode === 'upload'){
+        showError(
+          'Upload scan failed',
+          'The server could not process your files. This may be a server issue or an unsupported file format. Try the sample files instead — they run the same scanner on our bundled test configs.'
+        );
+      } else {
+        showError(
+          'Backend unavailable',
+          'The server could not be reached. The free-tier backend may still be warming up — wait 30 seconds and try again, or reload the page.'
+        );
+      }
+    } else {
+      showResults(data.endpoints || []);
+    }
+  }, 8000);
+}
+
+// ── SHOW RESULTS ────────────────────────────────────
+function showResults(eps){
+  const total = eps.length;
+  const shadows = eps.filter(e => e.state === 'shadow').length;
+  const noauth = eps.filter(e => !e.auth_detected).length;
+  const srcSet = new Set(eps.flatMap(e => e.sources || []));
+
+  document.getElementById('srow').innerHTML = `
+    <div class="sc"><div class="sc-n g">${total}</div><div class="sc-l">Endpoints found</div></div>
+    <div class="sc"><div class="sc-n b">${srcSet.size}</div><div class="sc-l">Sources scanned</div></div>
+    <div class="sc"><div class="sc-n r">${shadows}</div><div class="sc-l">Shadow APIs</div></div>
+    <div class="sc"><div class="sc-n a">${noauth}</div><div class="sc-l">No authentication</div></div>
+  `;
+
+  const list = document.getElementById('eplist');
+  list.innerHTML = '';
+
+  const srcMap = {nginx_config:'nginx',kong_gateway:'kong',code_repository:'code',network_traffic:'traffic'};
+
+  eps.forEach((ep, i) => {
+    const m = (ep.method||'GET').toUpperCase();
+    const mc = m==='POST'?'mbp':m==='DELETE'?'mbd':m==='GET'?'mbg':'mba';
+    const isShadow = ep.state === 'shadow';
+    const isZombie = ep.state === 'zombie';
+
+    const srcTags = (ep.sources||[]).map(s => {
+      const k = srcMap[s]||s;
+      return `<span class="tag t-${k}">${k}</span>`;
+    }).join('');
+
+    const authTag = ep.auth_detected
+      ? `<span class="tag t-auth">${ep.auth_type||'auth'}</span>`
+      : `<span class="tag t-noauth">no auth</span>`;
+
+    const shadowTag = isShadow ? `<span class="tag t-shadow">shadow api</span>` : '';
+    const zombieTag = isZombie ? `<span class="tag t-zombie">zombie</span>` : '';
+    const warning = isShadow
+      ? `<div class="ewarn">!! Observed in network traffic only — not registered in any gateway or codebase</div>` : '';
+
+    const card = document.createElement('div');
+    card.className = `epc${isShadow?' shadow':isZombie?' zombie':''}`;
+    card.style.animationDelay = (i * 35) + 'ms';
+    card.innerHTML = `
+      <div class="er1">
+        <span class="mb ${mc}">${m}</span>
+        <span class="epath">${ep.path}</span>
+        ${shadowTag}${zombieTag}
+      </div>
+      <div class="er2">${srcTags}${authTag}</div>
+      ${warning}
+    `;
+    list.appendChild(card);
+  });
+
+  document.getElementById('jbox').textContent = JSON.stringify(eps, null, 2);
+  document.getElementById('results').classList.add('show');
+}
+
+// ── JSON TOGGLE ─────────────────────────────────────
+function toggleJson(){
+  jsonOpen = !jsonOpen;
+  document.getElementById('jbox').classList.toggle('show', jsonOpen);
+  document.querySelector('.jtoggle').textContent = jsonOpen
+    ? 'Hide raw JSON' : 'View raw JSON output';
+}
+
+// ── RESET ────────────────────────────────────────────
+function reset(){
+  document.getElementById('input').style.display = 'block';
+  document.getElementById('terminal').classList.remove('show');
+  document.getElementById('results').classList.remove('show');
+  document.getElementById('tbody').innerHTML = '';
+  document.getElementById('runbtn').disabled = false;
+  jsonOpen = false;
+  document.getElementById('jbox').classList.remove('show');
+  document.querySelector('.jtoggle').textContent = 'View raw JSON output';
+  files = {};
+  hideError();
+}
+</script>
+</body>
+</html>
